@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}JO E-Tickets - Billet #{{ ticket.id }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="ticket-card">
+                <div class="ticket-header">
+                    <h4 class="mb-0">Billet #{{ ticket.id }}</h4>
+                    <span class="badge {% if ticket.est_valide %}bg-success{% else %}bg-danger{% endif %}">
+                        {% if ticket.est_valide %}Valide{% else %}Utilisé{% endif %}
+                    </span>
+                </div>
+                <div class="ticket-body">
+                    <div class="row mb-4">
+                        <div class="col-md-7">
+                            <h3>{{ ticket.offer.titre }}</h3>
+                            <p>
+                                <i class="fas fa-calendar-alt me-2"></i>{{ ticket.offer.date_evenement.strftime('%d/%m/%Y à %H:%M') }}
+                            </p>
+                            <p>
+                                <span class="badge bg-light text-dark">{{ ticket.offer.type|capitalize }}</span>
+                                <span class="badge bg-light text-dark">{{ ticket.offer.nombre_personnes }} personne(s)</span>
+                            </p>
+                            <hr class="bg-white">
+                            <p>
+                                <strong>Titulaire:</strong> {{ current_user.prenom }} {{ current_user.nom }}
+                            </p>
+                            <p>
+                                <strong>Commande:</strong> <a href="{{ url_for('orders.detail', order_id=ticket.order_id) }}" class="text-white">{{ ticket.order.reference }}</a>
+                            </p>
+                            <p>
+                                <strong>Généré le:</strong> {{ ticket.date_generation.strftime('%d/%m/%Y à %H:%M') }}
+                            </p>
+                            {% if not ticket.est_valide and ticket.date_utilisation %}
+                            <p>
+                                <strong>Utilisé le:</strong> {{ ticket.date_utilisation.strftime('%d/%m/%Y à %H:%M') }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-5 text-center">
+                            <div class="qr-code-container bg-white p-3 rounded mb-3">
+                                <img src="{{ ticket.qr_code }}" alt="QR Code" class="img-fluid qr-code-img">
+                            </div>
+                            <small class="text-white-50">Ce QR code sera scanné à l'entrée de l'événement</small>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h5>Description de l'offre</h5>
+                            <p>{{ ticket.offer.description }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('tickets.download', ticket_id=ticket.id) }}" class="btn btn-light">
+                            <i class="fas fa-download me-2"></i>Télécharger le PDF
+                        </a>
+                        <a href="{{ url_for('tickets.index') }}" class="btn btn-outline-light">
+                            <i class="fas fa-arrow-left me-2"></i>Retour à mes billets
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Informations importantes</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li>Présentez ce billet (format électronique ou imprimé) à l'entrée de l'événement.</li>
+                        <li>Une pièce d'identité pourra vous être demandée.</li>
+                        <li>Arrivez en avance pour faciliter les contrôles de sécurité.</li>
+                        <li>Ce billet est personnel et ne peut être revendu.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

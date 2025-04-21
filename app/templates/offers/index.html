@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}JO E-Tickets - Offres{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Nos offres</h1>
+
+<!-- Filtres -->
+<div class="filter-bar mb-4">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-md-0 mb-3">
+                <label for="offer-type-filter" class="form-label">Filtrer par type :</label>
+                <select id="offer-type-filter" class="form-select">
+                    <option value="">Tous les types</option>
+                    <option value="solo" {% if selected_type == 'solo' %}selected{% endif %}>Solo (1 personne)</option>
+                    <option value="duo" {% if selected_type == 'duo' %}selected{% endif %}>Duo (2 personnes)</option>
+                    <option value="familiale" {% if selected_type == 'familiale' %}selected{% endif %}>Familiale (4 personnes)</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-6 d-flex align-items-end">
+            <div class="text-md-end w-100">
+                <p class="mb-0"><strong>{{ offers|length }}</strong> offre(s) trouvée(s)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Liste des offres -->
+<div class="row">
+    {% if offers %}
+        {% for offer in offers %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if offer.image %}
+                <img src="/static/images/{{ offer.image }}" class="card-img-top" alt="{{ offer.titre }}">
+                {% else %}
+                <img src="/static/images/default-offer.jpg" class="card-img-top" alt="{{ offer.titre }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ offer.titre }}</h5>
+                    <p class="card-text">{{ offer.description|truncate(100) }}</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <span class="badge bg-primary">{{ offer.type|capitalize }}</span>
+                            <span class="badge bg-secondary">{{ offer.nombre_personnes }} personne(s)</span>
+                        </div>
+                        <span class="fs-5 fw-bold">{{ offer.prix }} €</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            Disponibilité : {{ offer.disponibilite }} billet(s)
+                        </small>
+                        <small class="text-muted">
+                            {{ offer.date_evenement.strftime('%d/%m/%Y') }}
+                        </small>
+                    </div>
+                </div>
+                <div class="card-footer d-grid">
+                    <a href="{{ url_for('offers.detail', offer_id=offer.id) }}" class="btn btn-primary">Voir les détails</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                Aucune offre disponible pour le moment.
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

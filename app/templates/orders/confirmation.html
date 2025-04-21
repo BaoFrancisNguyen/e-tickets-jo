@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}JO E-Tickets - Confirmation de paiement{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-check-circle me-2"></i>Paiement confirmé</h4>
+            </div>
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success fa-5x"></i>
+                </div>
+                <h2 class="mb-4">Merci pour votre commande!</h2>
+                <p class="lead">Votre paiement a été traité avec succès.</p>
+                <p>Référence de commande: <strong>{{ order.reference }}</strong></p>
+                <p>Total payé: <strong>{{ order.total }} €</strong></p>
+                <p>Date de paiement: <strong>{{ order.date_paiement.strftime('%d/%m/%Y à %H:%M') }}</strong></p>
+                
+                <hr class="my-4">
+                
+                <p>Vos billets électroniques ont été générés et sont disponibles dans la section "Mes billets".</p>
+                <p class="text-muted small">Un email de confirmation a également été envoyé à {{ order.adresse_email }}</p>
+                
+                <div class="d-grid gap-2 col-md-8 mx-auto mt-4">
+                    <a href="{{ url_for('tickets.index') }}" class="btn btn-primary">
+                        <i class="fas fa-ticket-alt me-2"></i>Voir mes billets
+                    </a>
+                    <a href="{{ url_for('orders.detail', order_id=order.id) }}" class="btn btn-outline-primary">
+                        <i class="fas fa-info-circle me-2"></i>Détails de la commande
+                    </a>
+                    <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-home me-2"></i>Retour à l'accueil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

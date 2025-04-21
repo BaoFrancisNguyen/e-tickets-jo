@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}JO E-Tickets - Offres{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- En-tête de la page -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-primary text-white p-4 rounded shadow-sm" style="background: linear-gradient(90deg, #0d6efd, #0a58ca);">
+                <h1 class="mb-2"><i class="fas fa-ticket-alt me-2"></i>Nos offres de billets</h1>
+                <p class="lead mb-0">Découvrez toutes nos offres pour les Jeux olympiques 2024 et réservez vos billets dès maintenant.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="filter-bar mb-4 bg-white p-3 rounded shadow-sm">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="mb-md-0 mb-3">
+                    <label for="offer-type-filter" class="form-label mb-1">Filtrer par type :</label>
+                    <select id="offer-type-filter" class="form-select">
+                        <option value="">Tous les types</option>
+                        <option value="solo" {% if selected_type == 'solo' %}selected{% endif %}>Solo (1 personne)</option>
+                        <option value="duo" {% if selected_type == 'duo' %}selected{% endif %}>Duo (2 personnes)</option>
+                        <option value="familiale" {% if selected_type == 'familiale' %}selected{% endif %}>Familiale (4 personnes)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <div class="text-md-end w-100">
+                    <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">
+                        <i class="fas fa-tag me-1"></i>{{ offers|length }} offre(s) trouvée(s)
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des offres -->
+    <div class="row">
+        {% if offers %}
+            {% for offer in offers %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <!-- Image de l'offre avec badge de type -->
+                    <div class="position-relative">
+                        {% if offer.image %}
+                        <img src="{{ url_for('static', filename='uploads/' + offer.image) }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ offer.titre }}">
+                        {% else %}
+                            {% if offer.type == 'solo' %}
+                            <img src="{{ url_for('static', filename='images/solo.jpg') }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ offer.titre }}">
+                            {% elif offer.type == 'duo' %}
+                            <img src="{{ url_for('static', filename='images/duo.jpg') }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ offer.titre }}">
+                            {% elif offer.type == 'familiale' %}
+                            <img src="{{ url_for('static', filename='images/familiale.jpg') }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ offer.titre }}">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='images/default-offer.jpg') }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ offer.titre }}">
+                            {% endif %}
+                        {% endif %}
+                        
+                        <!-- Badge du type d'offre -->
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge rounded-pill {% if offer.type == 'solo' %}bg-info{% elif offer.type == 'duo' %}bg-success{% else %}bg-warning{% endif %}">
+                                {{ offer.type|capitalize }}
+                            </span>
+                        </div>
+                        
+                        <!-- Badge de disponibilité -->
+                        <div class="position-absolute bottom-0 start-0 m-2">
+                            <span class="badge rounded-pill {% if offer.disponibilite > 10 %}bg-success{% elif offer.disponibilite > 0 %}bg-warning{% else %}bg-danger{% endif %}">
+                                {% if offer.disponibilite > 10 %}
+                                {{ offer.disponibilite }} disponibles
+                                {% elif offer.disponibilite > 0 %}
+                                Plus que {{ offer.disponibilite }} !
+                                {% else %}
+                                Épuisé
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Corps de la carte -->
+                    <div class="card-body">
+                        <h5 class="card-title">{{ offer.titre }}</h5>
+                        <p class="card-text text-muted">{{ offer.description|truncate(100) }}</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div>
+                                <i class="far fa-calendar-alt text-primary me-1"></i>
+                                <small>{{ offer.date_evenement.strftime('%d/%m/%Y') }}</small>
+                            </div>
+                            <div>
+                                <i class="far fa-clock text-primary me-1"></i>
+                                <small>{{ offer.date_evenement.strftime('%H:%M') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pied de la carte avec prix et bouton -->
+                    <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                        <span class="fs-5 fw-bold text-primary">{{ offer.prix }} €</span>
+                        <a href="{{ url_for('offers.detail', offer_id=offer.id) }}" class="btn btn-primary">
+                            <i class="fas fa-info-circle me-2"></i>Détails
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Aucune offre disponible pour le moment. Veuillez réessayer ultérieurement.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Pagination (si nécessaire dans le futur) -->
+    {% if offers|length > 12 %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="Pagination des offres">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Précédent</a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Suivant</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Section informative -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 bg-light">
+                <div class="card-body">
+                    <h3 class="mb-3">Informations sur les billets</h3>
+                    <div class="row">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="d-flex">
+                                <div class="me-3 text-primary">
+                                    <i class="fas fa-users fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h5>Types de billets</h5>
+                                    <p class="mb-0 text-muted small">Solo (1 personne), Duo (2 personnes) ou Familiale (4 personnes)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="d-flex">
+                                <div class="me-3 text-primary">
+                                    <i class="fas fa-ticket-alt fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h5>Tickets électroniques</h5>
+                                    <p class="mb-0 text-muted small">Tous les billets sont numériques avec un QR code unique</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex">
+                                <div class="me-3 text-primary">
+                                    <i class="fas fa-undo fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h5>Politique d'annulation</h5>
+                                    <p class="mb-0 text-muted small">Remboursement possible jusqu'à 30 jours avant l'événement</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gestionnaire pour le filtre de type d'offre
+        const offerTypeSelect = document.getElementById('offer-type-filter');
+        if (offerTypeSelect) {
+            offerTypeSelect.addEventListener('change', function() {
+                const selectedType = this.value;
+                const url = new URL(window.location.href);
+                
+                if (selectedType) {
+                    url.searchParams.set('type', selectedType);
+                } else {
+                    url.searchParams.delete('type');
+                }
+                
+                window.location.href = url.toString();
+            });
+        }
+        
+        // Animation d'entrée pour les cartes
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+
+<style>
+    /* Styles spécifiques à cette page */
+    .card {
+        transition: all 0.3s ease;
+        opacity: 0.8;
+        transform: translateY(10px);
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    
+    .filter-bar {
+        transition: all 0.3s ease;
+    }
+    
+    .filter-bar:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08) !important;
+    }
+</style>
+{% endblock %}

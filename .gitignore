@@ -1,0 +1,59 @@
+# Environnement virtuel
+venv/
+env/
+ENV/
+.env
+
+# Fichiers Python compilés
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Flask
+instance/
+.webassets-cache
+
+# SQLite database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Dossiers et fichiers de configuration
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Fichiers de configuration potentiellement sensibles
+config.py
+.env
+
+# Fichiers d'upload
+static/uploads/
+
+# Logs
+logs/
+*.log
+
+# Cache
+.pytest_cache/
+.coverage
+htmlcov/

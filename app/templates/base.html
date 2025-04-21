@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}JO E-Tickets{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <!-- Barre de navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                <i class="fas fa-ticket-alt me-2"></i>JO E-Tickets
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" href="{{ url_for('main.index') }}">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint and request.endpoint.startswith('offers.') %}active{% endif %}" href="{{ url_for('offers.index') }}">Offres</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint and request.endpoint.startswith('tickets.') %}active{% endif %}" href="{{ url_for('tickets.index') }}">Mes billets</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint and request.endpoint.startswith('orders.') %}active{% endif %}" href="{{ url_for('orders.index') }}">Mes commandes</a>
+                    </li>
+                    {% if current_user.role == 'administrateur' %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint and request.endpoint.startswith('admin.') %}active{% endif %}" href="{{ url_for('admin.index') }}">Administration</a>
+                    </li>
+                    {% endif %}
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link position-relative {% if request.endpoint and request.endpoint.startswith('cart.') %}active{% endif %}" href="{{ url_for('cart.index') }}">
+                            <i class="fas fa-shopping-cart"></i> Panier
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count">
+                                0
+                            </span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i> {{ current_user.prenom }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Mon profil</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Déconnexion</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'auth.login' %}active{% endif %}" href="{{ url_for('auth.login') }}">Connexion</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'auth.register' %}active{% endif %}" href="{{ url_for('auth.register') }}">Inscription</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages flash -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Contenu principal -->
+    <main class="container py-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>JO E-Tickets</h5>
+                    <p>La billetterie officielle des Jeux olympiques 2024 en France.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Liens utiles</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('main.about') }}" class="text-white">À propos</a></li>
+                        <li><a href="{{ url_for('main.contact') }}" class="text-white">Contact</a></li>
+                        <li><a href="{{ url_for('main.faq') }}" class="text-white">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Légal</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('main.terms') }}" class="text-white">Conditions d'utilisation</a></li>
+                        <li><a href="{{ url_for('main.privacy') }}" class="text-white">Politique de confidentialité</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p>&copy; 2024 JO E-Tickets. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <!-- Cart counter -->
+    {% if current_user.is_authenticated %}
+    <script>
+        // Mettre à jour le compteur du panier
+        function updateCartCount() {
+            fetch('{{ url_for("cart.api_count") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const cartCount = document.querySelector('.cart-count');
+                    cartCount.textContent = data.count;
+                    if (data.count === 0) {
+                        cartCount.style.display = 'none';
+                    } else {
+                        cartCount.style.display = 'inline-block';
+                    }
+                })
+                .catch(error => console.error('Erreur lors de la récupération du compteur du panier:', error));
+        }
+        
+        // Mettre à jour le compteur au chargement de la page
+        document.addEventListener('DOMContentLoaded', updateCartCount);
+    </script>
+    {% endif %}
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}JO E-Tickets - Mon Profil{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i>Mon Profil</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <strong>Nom d'utilisateur:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            {{ current_user.username }}
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <strong>Email:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            {{ current_user.email }}
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <strong>Nom:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            {{ current_user.nom }}
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <strong>Prénom:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            {{ current_user.prenom }}
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <strong>Date d'inscription:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            {{ current_user.date_creation.strftime('%d/%m/%Y') }}
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <strong>Dernière connexion:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            {% if current_user.derniere_connexion %}
+                                {{ current_user.derniere_connexion.strftime('%d/%m/%Y à %H:%M') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-4">
+                        <h5>Sécurité du compte</h5>
+                        <div class="d-grid gap-2 d-md-flex">
+                            <a href="{{ url_for('auth.change_password_route') }}" class="btn btn-primary">
+                                <i class="fas fa-key me-2"></i>Changer le mot de passe
+                            </a>
+                            
+                            {% if current_user.est_2fa_active %}
+                                <form method="POST" action="{{ url_for('auth.disable_2fa') }}">
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-unlock me-2"></i>Désactiver l'authentification à deux facteurs
+                                    </button>
+                                </form>
+                            {% else %}
+                                <a href="{{ url_for('auth.setup_2fa_route') }}" class="btn btn-success">
+                                    <i class="fas fa-lock me-2"></i>Activer l'authentification à deux facteurs
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

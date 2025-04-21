@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}JO E-Tickets - Panier{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Votre panier</h1>
+
+{% if cart.items %}
+<div class="row">
+    <!-- Liste des articles -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Articles ({{ cart.count_items() }})</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Offre</th>
+                                <th>Prix unitaire</th>
+                                <th>Quantité</th>
+                                <th>Sous-total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in cart.items %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if item.offer.image %}
+                                        <img src="{{ url_for('static', filename='uploads/' + item.offer.image) }}" class="img-thumbnail me-3" style="width: 50px;" alt="{{ item.offer.titre }}">
+                                        {% else %}
+                                        <img src="{{ url_for('static', filename='images/default-offer.jpg') }}" class="img-thumbnail me-3" style="width: 50px;" alt="{{ item.offer.titre }}">
+                                        {% endif %}
+                                        <div>
+                                            <h6 class="mb-0">{{ item.offer.titre }}</h6>
+                                            <small class="text-muted">{{ item.offer.type|capitalize }} - {{ item.offer.nombre_personnes }} personne(s)</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ item.prix_unitaire }} €</td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('cart.update_item', item_id=item.id) }}">
+                                        <div class="input-group input-group-sm" style="width: 120px;">
+                                            <button type="button" class="btn btn-outline-secondary btn-decrement">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <input type="number" name="quantity" class="form-control text-center quantity-input" value="{{ item.quantite }}" min="1" max="{{ item.offer.disponibilite }}">
+                                            <button type="button" class="btn btn-outline-secondary btn-increment">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td class="fw-bold">{{ item.sous_total() }} €</td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('cart.remove_item', item_id=item.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+                <a href="{{ url_for('offers.index') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Continuer les achats
+                </a>
+                <form method="POST" action="{{ url_for('cart.clear') }}">
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="fas fa-trash me-2"></i>Vider le panier
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Récapitulatif -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Récapitulatif</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Sous-total :</span>
+                    <span>{{ cart.total() }} €</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>TVA (20%) :</span>
+                    <span>{{ (cart.total() * 0.2)|round(2) }} €</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="fw-bold">Total :</span>
+                    <span class="fw-bold text-primary fs-5">{{ cart.total() }} €</span>
+                </div>
+                
+                <form method="POST" action="{{ url_for('orders.create') }}">
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-credit-card me-2"></i>Procéder au paiement
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="mt-3">
+                    <div class="alert alert-info small">
+                        <i class="fas fa-info-circle me-2"></i>En procédant au paiement, vous acceptez nos <a href="{{ url_for('main.terms') }}">conditions d'utilisation</a>.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center py-5">
+        <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+        <h4>Votre panier est vide</h4>
+        <p class="text-muted">Parcourez nos offres pour ajouter des billets à votre panier.</p>
+        <a href="{{ url_for('offers.index') }}" class="btn btn-primary mt-3">
+            <i class="fas fa-ticket-alt me-2"></i>Voir les offres
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

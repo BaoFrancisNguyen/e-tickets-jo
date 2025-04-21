@@ -1,0 +1,189 @@
+/* Styles généraux */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+/* Bannière principale */
+.jumbotron {
+    background-color: #0d6efd;
+    background-image: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    border-radius: 0.5rem;
+}
+
+/* Cartes */
+.card {
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Icônes circulaires */
+.circle-icon {
+    width: 50px;
+    height: 50px;
+    background-color: #0d6efd;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 auto;
+}
+
+/* Compte à rebours */
+#countdown .display-4 {
+    font-weight: bold;
+    color: #0d6efd;
+}
+
+/* Footer */
+footer {
+    background-color: #343a40;
+}
+
+footer a {
+    color: white;
+    text-decoration: none;
+}
+
+footer a:hover {
+    color: #0d6efd;
+    text-decoration: underline;
+}
+
+/* Formulaires */
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+}
+
+/* Boutons */
+.btn {
+    border-radius: 0.25rem;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0a58ca;
+    border-color: #0a58ca;
+}
+
+/* QR Codes */
+.qr-code-container {
+    max-width: 300px;
+    margin: 0 auto;
+    padding: 1rem;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.qr-code-img {
+    width: 100%;
+    height: auto;
+}
+
+/* Compteur de panier */
+.cart-count {
+    font-size: 0.65rem;
+    font-weight: bold;
+    transform: translate(-50%, -50%);
+}
+
+/* Tickets */
+.ticket-card {
+    background: linear-gradient(45deg, #0a58ca, #0d6efd);
+    color: white;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.ticket-header {
+    padding: 1rem;
+    background-color: rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ticket-body {
+    padding: 1.5rem;
+}
+
+.ticket-footer {
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 1rem;
+    text-align: center;
+}
+
+/* Admin dashboard */
+.stats-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: #495057;
+}
+
+.stats-card .number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #0d6efd;
+}
+
+/* Offers list */
+.filter-bar {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+    .card-img-top {
+        height: 150px;
+    }
+    
+    #countdown .display-4 {
+        font-size: 2rem;
+    }
+    
+    .circle-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}JO E-Tickets - Paiement{% endblock %}
+
+{% block content %}
+<h1>Paiement</h1>
+<p>Commande: {{ order.reference }}</p>
+<p>Total: {{ order.total }} €</p>
+
+<form method="POST">
+  <button type="submit" class="btn btn-primary">Simuler un paiement</button>
+</form>
+{% endblock %}
