@@ -172,24 +172,63 @@ def verify_jwt_token(token):
 def setup_2fa(user):
     """
     Configure l'authentification à deux facteurs pour un utilisateur.
+    
+    Cette fonction génère un secret pour l'authentification TOTP et crée un
+    URI pour le QR code qui sera scanné par l'application d'authentification.
+    
+    Args:
+        user (User): L'utilisateur pour lequel activer l'authentification à deux facteurs
+        
+    Returns:
+        tuple: (success, result)
+            - success (bool): True si la configuration a réussi, False sinon
+            - result (dict ou str): Dictionnaire contenant le secret et l'URI en cas de succès,
+                                   message d'erreur en cas d'échec
     """
     if user.est_2fa_active:
         return False, "L'authentification à deux facteurs est déjà activée."
     
-    # Générer un secret
-    secret = user.generate_2fa_secret()
-    
-    # Générer l'URI pour le QR code
-    totp = pyotp.TOTP(secret)
-    provisioning_uri = totp.provisioning_uri(
-        name=user.email,
-        issuer_name="JO E-Tickets"
-    )
-    
-    return True, {
-        'secret': secret,
-        'uri': provisioning_uri
-    }
+    try:
+        # Générer un secret
+        secret = user.generate_2fa_secret()
+        
+        # Générer l'URI pour le QR code
+        import pyotp
+        totp = pyotp.TOTP(secret)
+        provisioning_uri = totp.provisioning_uri(
+            name=user.email,
+            issuer_name="JO E-Tickets"
+        )
+        
+        # Générer le QR code en Data URI pour l'afficher directement dans le template
+        import qrcode
+        import io
+        import base64
+        
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(provisioning_uri)
+        qr.make(fit=True)
+        
+        img = qr.make_image(fill_color="black", back_color="white")
+        
+        # Convertir l'image en Data URI
+        buffered = io.BytesIO()
+        img.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+        data_uri = f"data:image/png;base64,{img_str}"
+        
+        return True, {
+            'secret': secret,
+            'uri': data_uri
+        }
+    except Exception as e:
+        # En cas d'erreur, retourner un message explicatif
+        return False, f"Erreur lors de la configuration de l'authentification à deux facteurs: {str(e)}"
 
 def verify_2fa_code(user, code):
     """

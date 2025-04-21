@@ -1,3 +1,4 @@
+```html
 {% extends "base.html" %}
 
 {% block title %}JO E-Tickets - Configuration de l'authentification à deux facteurs{% endblock %}
@@ -20,8 +21,24 @@
                         <p>Utilisez une application d'authentification comme Google Authenticator, Microsoft Authenticator ou Authy pour scanner ce code QR:</p>
                         
                         <div class="qr-code-container bg-white p-3 border rounded text-center mb-4">
-                            <img src="{{ uri }}" alt="QR Code" class="img-fluid">
+                            <!-- Affichage du QR code avec un data URI -->
+                            {% if uri %}
+                                <img src="{{ uri }}" alt="QR Code" class="img-fluid">
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Erreur: QR code non disponible. Veuillez réessayer.
+                                </div>
+                            {% endif %}
                         </div>
+                        
+                        <!-- Clé de secours (optionnelle) -->
+                        {% if secret %}
+                        <div class="alert alert-secondary">
+                            <p class="mb-1"><strong>Clé de secours:</strong></p>
+                            <p class="mb-0 user-select-all font-monospace">{{ secret }}</p>
+                            <small class="text-muted">Si vous ne pouvez pas scanner le code QR, entrez cette clé manuellement dans votre application d'authentification.</small>
+                        </div>
+                        {% endif %}
                     </div>
                     
                     <div class="col-md-6">

@@ -208,7 +208,10 @@ def setup_2fa_route():
     # Stocker le secret en session pour la vérification
     session['setup_2fa_secret'] = result['secret']
     
-    return render_template('auth/setup_2fa.html', uri=result['uri'])
+    # Passer à la fois le secret et l'URI du QR code au template
+    return render_template('auth/setup_2fa.html', 
+                           uri=result['uri'], 
+                           secret=result['secret'])
 
 @auth_bp.route('/verify-2fa', methods=['POST'])
 @login_required
