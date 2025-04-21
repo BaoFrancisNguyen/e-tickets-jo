@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}JO E-Tickets - Authentification à deux facteurs{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-lock me-2"></i>Authentification à deux facteurs</h4>
+            </div>
+            <div class="card-body">
+                <p class="mb-4">Veuillez entrer le code à 6 chiffres généré par votre application d'authentification.</p>
+                
+                <form method="POST" action="" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.code.label(class="form-label") }}
+                        {% if form.code.errors %}
+                            {{ form.code(class="form-control is-invalid", placeholder="Entrez le code à 6 chiffres") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.code.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.code(class="form-control", placeholder="Entrez le code à 6 chiffres") }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+                
+                <div class="mt-3 text-center">
+                    <p class="small text-muted">
+                        Si vous avez perdu accès à votre application d'authentification, veuillez contacter le support.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}JO E-Tickets - {{ title }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('admin_custom.offers') }}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-2"></i>Retour à la liste des offres
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">{{ title }}</h4>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="" enctype="multipart/form-data" novalidate>
+            {{ form.hidden_tag() }}
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.titre.label(class="form-label") }}
+                        {% if form.titre.errors %}
+                            {{ form.titre(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.titre.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.titre(class="form-control") }}
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        {{ form.type.label(class="form-label") }}
+                        {% if form.type.errors %}
+                            {{ form.type(class="form-select is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.type.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.type(class="form-select") }}
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        {{ form.nombre_personnes.label(class="form-label") }}
+                        {% if form.nombre_personnes.errors %}
+                            {{ form.nombre_personnes(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.nombre_personnes.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.nombre_personnes(class="form-control") }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                {{ form.description.label(class="form-label") }}
+                {% if form.description.errors %}
+                    {{ form.description(class="form-control is-invalid", rows=5) }}
+                    <div class="invalid-feedback">
+                        {% for error in form.description.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.description(class="form-control", rows=5) }}
+                {% endif %}
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form.prix.label(class="form-label") }}
+                        {% if form.prix.errors %}
+                            {{ form.prix(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.prix.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.prix(class="form-control") }}
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form.disponibilite.label(class="form-label") }}
+                        {% if form.disponibilite.errors %}
+                            {{ form.disponibilite(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.disponibilite.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.disponibilite(class="form-control") }}
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form.date_evenement.label(class="form-label") }}
+                        {% if form.date_evenement.errors %}
+                            {{ form.date_evenement(class="form-control is-invalid", type="datetime-local") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.date_evenement.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.date_evenement(class="form-control", type="datetime-local") }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.image.label(class="form-label") }}
+                        {% if form.image.errors %}
+                            {{ form.image(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.image.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.image(class="form-control") }}
+                        {% endif %}
+                        <small class="text-muted">Formats acceptés: JPG, PNG</small>
+                    </div>
+                    
+                    {% if offer and offer.image %}
+                    <div class="mb-3">
+                        <p>Image actuelle:</p>
+                        <img src="{{ url_for('static', filename='images/' + offer.image) }}" alt="{{ offer.titre }}" class="img-thumbnail" style="max-height: 150px;">
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Statut de publication</label>
+                        <div class="form-check form-switch">
+                            {{ form.est_publie(class="form-check-input") }}
+                            {{ form.est_publie.label(class="form-check-label") }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('admin_custom.offers') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>Annuler
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save me-2"></i>{{ form.submit.label.text }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mettre à jour automatiquement le nombre de personnes en fonction du type
+        const typeSelect = document.getElementById('type');
+        const nombrePersonnesInput = document.getElementById('nombre_personnes');
+        
+        if (typeSelect && nombrePersonnesInput) {
+            typeSelect.addEventListener('change', function() {
+                const selectedType = this.value;
+                
+                // Définir le nombre de personnes en fonction du type
+                switch (selectedType) {
+                    case 'solo':
+                        nombrePersonnesInput.value = 1;
+                        break;
+                    case 'duo':
+                        nombrePersonnesInput.value = 2;
+                        break;
+                    case 'familiale':
+                        nombrePersonnesInput.value = 4;
+                        break;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

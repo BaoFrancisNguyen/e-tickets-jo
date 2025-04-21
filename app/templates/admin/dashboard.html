@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}JO E-Tickets - Administration{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-tachometer-alt me-2"></i>Tableau de bord administrateur</h1>
+    <div>
+        <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary">
+            <i class="fas fa-home me-2"></i>Retour au site
+        </a>
+    </div>
+</div>
+
+<!-- Statistiques générales -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stats-card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-users fa-3x text-primary"></i>
+                </div>
+                <h4 class="card-title">Utilisateurs</h4>
+                <p class="number mb-0">{{ total_users }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-ticket-alt fa-3x text-success"></i>
+                </div>
+                <h4 class="card-title">Offres</h4>
+                <p class="number mb-0">{{ total_offers }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-shopping-cart fa-3x text-warning"></i>
+                </div>
+                <h4 class="card-title">Commandes</h4>
+                <p class="number mb-0">{{ total_orders }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-qrcode fa-3x text-danger"></i>
+                </div>
+                <h4 class="card-title">Billets</h4>
+                <p class="number mb-0">{{ total_tickets }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Graphique des offres -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Distribution des billets par type</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="offers-chart" width="400" height="300" 
+                    data-offers='{"labels": ["Solo", "Duo", "Familiale"], "data": [{{ offers_stats.solo }}, {{ offers_stats.duo }}, {{ offers_stats.familiale }}]}'>
+                </canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dernières commandes -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Dernières commandes</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_orders %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Référence</th>
+                                <th>Client</th>
+                                <th>Date</th>
+                                <th>Montant</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td>{{ order.reference }}</td>
+                                <td>{{ order.user.prenom }} {{ order.user.nom }}</td>
+                                <td>{{ order.date_commande.strftime('%d/%m/%Y') }}</td>
+                                <td>{{ order.total }} €</td>
+                                <td>
+                                    <a href="{{ url_for('admin_custom.orders') }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Aucune commande récente.
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer text-end">
+                <a href="{{ url_for('admin_custom.orders') }}" class="btn btn-outline-primary btn-sm">
+                    Voir toutes les commandes
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Liens rapides -->
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Gestion</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <a href="{{ url_for('admin_custom.offers') }}" class="btn btn-outline-primary d-block p-3">
+                            <i class="fas fa-ticket-alt fa-2x mb-2"></i><br>
+                            Gérer les offres
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <a href="{{ url_for('admin_custom.users') }}" class="btn btn-outline-primary d-block p-3">
+                            <i class="fas fa-users fa-2x mb-2"></i><br>
+                            Gérer les utilisateurs
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <a href="{{ url_for('admin_custom.orders') }}" class="btn btn-outline-primary d-block p-3">
+                            <i class="fas fa-shopping-cart fa-2x mb-2"></i><br>
+                            Gérer les commandes
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('admin_custom.stats') }}" class="btn btn-outline-primary d-block p-3">
+                            <i class="fas fa-chart-line fa-2x mb-2"></i><br>
+                            Statistiques
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Graphique des offres
+        var offersChartCanvas = document.getElementById('offers-chart');
+        if (offersChartCanvas) {
+            var offersData = JSON.parse(offersChartCanvas.getAttribute('data-offers'));
+            
+            new Chart(offersChartCanvas, {
+                type: 'pie',
+                data: {
+                    labels: offersData.labels,
+                    datasets: [{
+                        data: offersData.data,
+                        backgroundColor: [
+                            '#0d6efd',
+                            '#20c997',
+                            '#fd7e14'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Répartition des billets par type d\'offre'
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

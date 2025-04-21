@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}JO E-Tickets - Contact{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- En-tête de la page -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4">Contactez-nous</h1>
+            <p class="lead text-muted">Notre équipe est à votre disposition pour répondre à vos questions.</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Formulaire de contact -->
+        <div class="col-lg-8 mb-4 mb-lg-0">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-envelope me-2"></i>Formulaire de contact</h4>
+                </div>
+                <div class="card-body">
+                    <form id="contact-form" action="" method="post">
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label for="name" class="form-label">Nom complet</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Adresse email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Sujet</label>
+                            <select class="form-select" id="subject" name="subject" required>
+                                <option value="">Sélectionnez un sujet</option>
+                                <option value="question">Question générale</option>
+                                <option value="billing">Problème de paiement</option>
+                                <option value="tickets">Problème avec mes billets</option>
+                                <option value="account">Problème de compte</option>
+                                <option value="other">Autre</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" name="message" rows="6" required></textarea>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="privacy" required>
+                            <label class="form-check-label" for="privacy">
+                                J'accepte que mes données soient traitées conformément à la <a href="{{ url_for('main.privacy') }}">politique de confidentialité</a>.
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Envoyer le message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Informations de contact -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Coordonnées</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex mb-3">
+                        <div class="flex-shrink-0 me-3">
+                            <i class="fas fa-map-marker-alt fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h5>Adresse</h5>
+                            <p class="mb-0">123 Avenue des Champions<br>75008 Paris, France</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex mb-3">
+                        <div class="flex-shrink-0 me-3">
+                            <i class="fas fa-phone fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h5>Téléphone</h5>
+                            <p class="mb-0">+33 (0)1 23 45 67 89</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex mb-3">
+                        <div class="flex-shrink-0 me-3">
+                            <i class="fas fa-envelope fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h5>Email</h5>
+                            <p class="mb-0">contact@jo-etickets.fr</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                            <i class="fas fa-clock fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h5>Horaires d'ouverture</h5>
+                            <p class="mb-0">Lundi - Vendredi: 9h00 - 18h00<br>Samedi: 10h00 - 15h00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Réseaux sociaux -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-share-alt me-2"></i>Suivez-nous</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <a href="#" class="btn btn-outline-primary btn-lg">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-primary btn-lg">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-primary btn-lg">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-primary btn-lg">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Map -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-map me-2"></i>Nous trouver</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="ratio ratio-21x9">
+                        <!-- Placeholder pour une carte Google Maps -->
+                        <div class="bg-light d-flex align-items-center justify-content-center">
+                            <div class="text-center">
+                                <i class="fas fa-map-marked-alt fa-4x text-muted mb-3"></i>
+                                <h5>Carte interactive</h5>
+                                <p class="text-muted">La carte Google Maps s'afficherait ici dans une version de production.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gestion du formulaire de contact
+        const contactForm = document.getElementById('contact-form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                // Simulation d'envoi de message
+                alert('Votre message a été envoyé avec succès. Nous vous répondrons dans les plus brefs délais.');
+                contactForm.reset();
+            });
+        }
+    });
+</script>
+{% endblock %}
