@@ -1,0 +1,377 @@
+```html
+{% extends "base.html" %}
+
+{% block title %}JO E-Tickets - Gestion des billets{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-ticket-alt me-2"></i>Gestion des billets</h1>
+    <div class="btn-group">
+        <button type="button" class="btn btn-outline-primary" id="export-csv">
+            <i class="fas fa-file-csv me-2"></i>Exporter CSV
+        </button>
+        <a href="{{ url_for('tickets.scan') }}" class="btn btn-primary">
+            <i class="fas fa-qrcode me-2"></i>Scanner un billet
+        </a>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3 mb-2 mb-md-0">
+                <select id="status-filter" class="form-select">
+                    <option value="">Tous les statuts</option>
+                    <option value="valide">Valide</option>
+                    <option value="utilisé">Utilisé</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-2 mb-md-0">
+                <select id="event-filter" class="form-select">
+                    <option value="">Tous les événements</option>
+                    <!-- Options générées dynamiquement en fonction des événements disponibles -->
+                    <option value="1">Finale Natation 100m</option>
+                    <option value="2">Cérémonie d'ouverture</option>
+                    <option value="3">Finale Athlétisme 200m</option>
+                </select>
+            </div>
+            <div class="col-md-4 mb-2 mb-md-0">
+                <input type="text" id="search-input" class="form-control" placeholder="Rechercher par ID ou client...">
+            </div>
+            <div class="col-md-2">
+                <button id="reset-filters" class="btn btn-outline-secondary w-100">
+                    <i class="fas fa-undo me-2"></i>Réinitialiser
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Liste des billets -->
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Liste des billets</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Offre</th>
+                        <th>Client</th>
+                        <th>Date de l'événement</th>
+                        <th>Date de génération</th>
+                        <th>Statut</th>
+                        <th>Date d'utilisation</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                    <tr>
+                        <td>{{ ticket.id }}</td>
+                        <td>{{ ticket.offer.titre }}</td>
+                        <td>{{ ticket.user.prenom }} {{ ticket.user.nom }}</td>
+                        <td>{{ ticket.offer.date_evenement.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ ticket.date_generation.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <span class="badge {% if ticket.est_valide %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if ticket.est_valide %}Valide{% else %}Utilisé{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            {% if ticket.date_utilisation %}
+                                {{ ticket.date_utilisation.strftime('%d/%m/%Y %H:%M') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('tickets.detail', ticket_id=ticket.id) }}" class="btn btn-outline-primary" target="_blank" title="Voir">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-primary view-qr" data-bs-toggle="modal" data-bs-target="#qrCodeModal" data-ticket-id="{{ ticket.id }}" data-qr-code="{{ ticket.qr_code }}" title="QR Code">
+                                    <i class="fas fa-qrcode"></i>
+                                </button>
+                                {% if ticket.est_valide %}
+                                <button type="button" class="btn btn-outline-warning validate-ticket" data-ticket-id="{{ ticket.id }}" title="Valider">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                {% endif %}
+                                <button type="button" class="btn btn-outline-danger cancel-ticket" data-bs-toggle="modal" data-bs-target="#cancelTicketModal" data-ticket-id="{{ ticket.id }}" title="Annuler">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="d-flex justify-content-between align-items-center">
+            <span>{{ tickets|length }} billet(s) au total</span>
+            <nav aria-label="Navigation des billets">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Précédent</a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Suivant</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Modal QR Code -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrCodeModalLabel">QR Code du billet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="qr-code-container bg-white p-3 rounded mb-3">
+                    <img id="qr-code-image" src="" alt="QR Code" class="img-fluid">
+                </div>
+                <p>Billet #<span id="ticket-id-display"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" id="print-qr">
+                    <i class="fas fa-print me-2"></i>Imprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation d'annulation -->
+<div class="modal fade" id="cancelTicketModal" tabindex="-1" aria-labelledby="cancelTicketModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="cancelTicketModalLabel">Confirmation d'annulation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir annuler le billet #<strong id="ticket-id-placeholder"></strong> ?</p>
+                <p class="text-danger">Cette action est irréversible. Le billet sera invalidé et ne pourra plus être utilisé.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form id="cancel-ticket-form" method="POST" action="">
+                    <button type="submit" class="btn btn-danger">Confirmer l'annulation</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistiques des billets -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Statistiques des billets</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted">Billets émis</h6>
+                                <h3 class="mb-0">{{ tickets|length }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted">Billets valides</h6>
+                                <h3 class="mb-0">{{ tickets|selectattr('est_valide', 'equalto', true)|list|length }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted">Billets utilisés</h6>
+                                <h3 class="mb-0">{{ tickets|selectattr('est_valide', 'equalto', false)|list|length }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filtres
+        const statusFilter = document.getElementById('status-filter');
+        const eventFilter = document.getElementById('event-filter');
+        const searchInput = document.getElementById('search-input');
+        const resetButton = document.getElementById('reset-filters');
+        const rows = document.querySelectorAll('tbody tr');
+        
+        // Fonction pour appliquer les filtres
+        function applyFilters() {
+            const statusValue = statusFilter.value.toLowerCase();
+            const eventValue = eventFilter.value;
+            const searchValue = searchInput.value.toLowerCase();
+            
+            rows.forEach(function(row) {
+                const status = row.querySelector('td:nth-child(6)').textContent.trim().toLowerCase();
+                const event = row.querySelector('td:nth-child(2)').textContent.trim();
+                const id = row.querySelector('td:nth-child(1)').textContent;
+                const client = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                
+                // Convertir les ID d'événements en texte pour la comparaison
+                let matchevent = !eventValue;
+                if (eventValue === "1" && event.includes("Finale Natation")) matchevent = true;
+                if (eventValue === "2" && event.includes("Cérémonie")) matchevent = true;
+                if (eventValue === "3" && event.includes("Athlétisme")) matchevent = true;
+                
+                const statusMatch = !statusValue || status.includes(statusValue);
+                const searchMatch = !searchValue || id.includes(searchValue) || client.includes(searchValue);
+                
+                if (statusMatch && matchevent && searchMatch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        // Événements pour les filtres
+        statusFilter.addEventListener('change', applyFilters);
+        eventFilter.addEventListener('change', applyFilters);
+        searchInput.addEventListener('input', applyFilters);
+        
+        // Réinitialiser les filtres
+        resetButton.addEventListener('click', function() {
+            statusFilter.value = '';
+            eventFilter.value = '';
+            searchInput.value = '';
+            rows.forEach(function(row) {
+                row.style.display = '';
+            });
+        });
+        
+        // Modal QR Code
+        const qrCodeModal = document.getElementById('qrCodeModal');
+        const viewQrButtons = document.querySelectorAll('.view-qr');
+        
+        if (qrCodeModal) {
+            qrCodeModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const ticketId = button.getAttribute('data-ticket-id');
+                const qrCode = button.getAttribute('data-qr-code');
+                
+                document.getElementById('ticket-id-display').textContent = ticketId;
+                document.getElementById('qr-code-image').src = qrCode;
+            });
+        }
+        
+        // Impression du QR code
+        const printQrButton = document.getElementById('print-qr');
+        if (printQrButton) {
+            printQrButton.addEventListener('click', function() {
+                const printWindow = window.open('', '_blank');
+                const ticketId = document.getElementById('ticket-id-display').textContent;
+                const qrCodeSrc = document.getElementById('qr-code-image').src;
+                
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>QR Code - Billet #${ticketId}</title>
+                        <style>
+                            body { 
+                                font-family: Arial, sans-serif;
+                                text-align: center;
+                                padding: 50px;
+                            }
+                            img {
+                                max-width: 300px;
+                                height: auto;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>Billet #${ticketId}</h2>
+                        <p>JO E-Tickets - Jeux olympiques 2024</p>
+                        <div style="margin: 30px 0;">
+                            <img src="${qrCodeSrc}" alt="QR Code">
+                        </div>
+                        <p>Scannez ce QR code à l'entrée de l'événement</p>
+                    </body>
+                    </html>
+                `);
+                
+                printWindow.document.close();
+                printWindow.focus();
+                
+                // Imprimer après chargement de l'image
+                setTimeout(function() {
+                    printWindow.print();
+                    printWindow.close();
+                }, 500);
+            });
+        }
+        
+        // Validation manuelle de billets
+        const validateButtons = document.querySelectorAll('.validate-ticket');
+        
+        validateButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                const ticketId = this.getAttribute('data-ticket-id');
+                
+                if (confirm(`Êtes-vous sûr de vouloir valider le billet #${ticketId} ? Cette action est irréversible.`)) {
+                    // Dans une application réelle, vous feriez une requête AJAX pour valider le billet
+                    
+                    // Simuler une requête réussie
+                    alert(`Billet #${ticketId} validé avec succès. (Ceci est une simulation)`);
+                    
+                    // Actualiser la page pour voir les changements
+                    location.reload();
+                }
+            });
+        });
+        
+        // Modal d'annulation de billet
+        const cancelTicketModal = document.getElementById('cancelTicketModal');
+        const cancelButtons = document.querySelectorAll('.cancel-ticket');
+        
+        if (cancelTicketModal) {
+            cancelTicketModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const ticketId = button.getAttribute('data-ticket-id');
+                
+                document.getElementById('ticket-id-placeholder').textContent = ticketId;
+                document.getElementById('cancel-ticket-form').action = `/admin/tickets/${ticketId}/cancel`;
+            });
+        }
+        
+        // Export CSV
+        document.getElementById('export-csv').addEventListener('click', function() {
+            // Dans une application réelle, cette fonction appellerait une API pour générer et télécharger un CSV
+            alert('Exportation CSV démarrée. Le fichier sera téléchargé automatiquement. (Ceci est une simulation)');
+        });
+    });
+</script>
+{% endblock %}

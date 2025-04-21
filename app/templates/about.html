@@ -1,0 +1,183 @@
+
+{% extends "base.html" %}
+
+{% block title %}JO E-Tickets - À propos{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- En-tête de la page -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4">À propos de JO E-Tickets</h1>
+            <p class="lead text-muted">La billetterie officielle des Jeux olympiques 2024 en France.</p>
+        </div>
+    </div>
+    
+    <!-- Notre histoire -->
+    <div class="row mb-5">
+        <div class="col-md-6 mb-4 mb-md-0">
+            <img src="{{ url_for('static', filename='images/about-team.jpg') }}" alt="Notre équipe" class="img-fluid rounded shadow-sm">
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title border-bottom pb-3 mb-4">Notre histoire</h2>
+                    <p>JO E-Tickets a été fondée en 2022 avec une mission simple mais ambitieuse : révolutionner l'expérience d'achat de billets pour les grands événements sportifs.</p>
+                    <p>Sélectionnée par le Comité d'Organisation des Jeux Olympiques de Paris 2024, notre entreprise est fière d'être la plateforme officielle de billetterie électronique pour cet événement mondial.</p>
+                    <p>Notre équipe de passionnés de sport et d'experts en technologie travaille sans relâche pour offrir une expérience utilisateur exceptionnelle et sécurisée, du moment de l'achat jusqu'à l'événement lui-même.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notre mission -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 bg-primary text-white shadow">
+                <div class="card-body p-5">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 class="card-title mb-4">Notre mission</h2>
+                            <p class="lead">Rendre les Jeux olympiques accessibles à tous, en toute sécurité et simplicité.</p>
+                            <p>Nous croyons que la technologie doit servir l'expérience utilisateur, et non l'inverse. C'est pourquoi nous avons développé une plateforme intuitive et sécurisée, où chacun peut acheter ses billets en quelques clics, sans tracas et en toute confiance.</p>
+                            <p>Notre système de billetterie électronique permet non seulement de réduire l'empreinte écologique des Jeux olympiques, mais aussi de lutter efficacement contre la fraude et le marché noir.</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-bullseye fa-6x mb-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Nos valeurs -->
+    <div class="row mb-5">
+        <div class="col-12 mb-4 text-center">
+            <h2>Nos valeurs</h2>
+            <p class="lead text-muted">Ce qui nous guide au quotidien</p>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="circle-icon mb-3">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="card-title">Sécurité</h3>
+                    <p class="card-text">La sécurité de vos données personnelles et de vos transactions est notre priorité absolue. Nous utilisons les technologies les plus avancées pour protéger votre vie privée.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="circle-icon mb-3">
+                        <i class="fas fa-universal-access"></i>
+                    </div>
+                    <h3 class="card-title">Accessibilité</h3>
+                    <p class="card-text">Nous croyons que le sport doit être accessible à tous. Notre plateforme est conçue pour être utilisable par tous, y compris les personnes en situation de handicap.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="circle-icon mb-3">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h3 class="card-title">Durabilité</h3>
+                    <p class="card-text">En privilégiant les billets électroniques, nous contribuons à réduire l'empreinte écologique des Jeux olympiques. Un petit geste pour un grand impact.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notre équipe -->
+    <div class="row mb-5">
+        <div class="col-12 mb-4 text-center">
+            <h2>Notre équipe dirigeante</h2>
+            <p class="lead text-muted">Les personnes qui rendent tout cela possible</p>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <img src="{{ url_for('static', filename='images/ceo.jpg') }}" class="card-img-top" alt="CEO">
+                <div class="card-body text-center">
+                    <h4 class="card-title">Sophie Dubois</h4>
+                    <p class="text-muted">Fondatrice & PDG</p>
+                    <p class="card-text">Ancienne athlète olympique, Sophie a fondé JO E-Tickets avec la vision de rendre les Jeux olympiques plus accessibles à tous.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <img src="{{ url_for('static', filename='images/cto.jpg') }}" class="card-img-top" alt="CTO">
+                <div class="card-body text-center">
+                    <h4 class="card-title">Thomas Leclerc</h4>
+                    <p class="text-muted">Directeur Technique</p>
+                    <p class="card-text">Expert en cybersécurité, Thomas veille à ce que notre plateforme soit à la fois performante et ultra-sécurisée.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <img src="{{ url_for('static', filename='images/cmo.jpg') }}" class="card-img-top" alt="CMO">
+                <div class="card-body text-center">
+                    <h4 class="card-title">Marie Leroy</h4>
+                    <p class="text-muted">Directrice Marketing</p>
+                    <p class="card-text">Avec plus de 15 ans d'expérience dans l'événementiel sportif, Marie pilote la stratégie marketing de JO E-Tickets.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Partenaires -->
+    <div class="row mb-5">
+        <div class="col-12 mb-4 text-center">
+            <h2>Nos partenaires</h2>
+            <p class="lead text-muted">Ils nous font confiance</p>
+        </div>
+        
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body py-5">
+                    <div class="row align-items-center text-center">
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <img src="{{ url_for('static', filename='images/partner1.png') }}" alt="Partenaire 1" class="img-fluid" style="max-height: 60px;">
+                        </div>
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <img src="{{ url_for('static', filename='images/partner2.png') }}" alt="Partenaire 2" class="img-fluid" style="max-height: 60px;">
+                        </div>
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <img src="{{ url_for('static', filename='images/partner3.png') }}" alt="Partenaire 3" class="img-fluid" style="max-height: 60px;">
+                        </div>
+                        <div class="col-md-3">
+                            <img src="{{ url_for('static', filename='images/partner4.png') }}" alt="Partenaire 4" class="img-fluid" style="max-height: 60px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Appel à l'action -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-light border-0 shadow-sm">
+                <div class="card-body p-5 text-center">
+                    <h2 class="mb-4">Prêt à vivre l'expérience olympique ?</h2>
+                    <p class="lead mb-4">Découvrez nos offres de billets pour les Jeux olympiques de Paris 2024.</p>
+                    <a href="{{ url_for('offers.index') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-ticket-alt me-2"></i>Voir les offres
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

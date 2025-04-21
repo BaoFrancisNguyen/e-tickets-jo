@@ -1,0 +1,204 @@
+```html
+{% extends "base.html" %}
+
+{% block title %}JO E-Tickets - Scanner un billet{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 offset-lg-2">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-qrcode me-2"></i>Scanner et valider un billet</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-primary">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-info-circle fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="alert-heading">Mode validation</h5>
+                            <p class="mb-0">Cet outil permet de scanner et valider un billet pour un événement. La validation est irréversible, le billet sera marqué comme utilisé.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <form method="POST" action="" class="mb-4">
+                    <div class="mb-3">
+                        <label for="qr_data" class="form-label">Données du QR code</label>
+                        <textarea id="qr_data" name="qr_data" class="form-control" rows="5" placeholder="Collez ici les données du QR code ou utilisez le scanner" required></textarea>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="button" id="scan-button" class="btn btn-outline-primary">
+                            <i class="fas fa-camera me-2"></i>Scanner un QR code
+                        </button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-check-circle me-2"></i>Valider le billet
+                        </button>
+                    </div>
+                </form>
+                
+                <hr>
+                
+                {% if result %}
+                <div class="result-container mt-4">
+                    <h5 class="mb-3">Résultat de la validation</h5>
+                    
+                    {% if result.valid %}
+                    <div class="alert alert-success">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                            <div>
+                                <h5 class="alert-heading mb-1">Billet validé avec succès</h5>
+                                <p class="mb-0">Le billet #{{ result.ticket_id }} a été validé et marqué comme utilisé.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mt-3">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Informations du billet</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Numéro du billet:</strong> #{{ result.ticket_id }}</p>
+                                    <p><strong>Événement:</strong> {{ result.offer }}</p>
+                                    <p><strong>Titulaire:</strong> {{ result.user }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Validé le:</strong> {{ result.validated_at }}</p>
+                                    <p><strong>Validé par:</strong> {{ current_user.prenom }} {{ current_user.nom }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <div class="alert alert-success">
+                            <i class="fas fa-user-check me-2"></i>Accès autorisé
+                        </div>
+                        <button class="btn btn-primary mt-3" id="print-btn">
+                            <i class="fas fa-print me-2"></i>Imprimer le reçu
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-danger">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-times-circle fa-2x"></i>
+                            </div>
+                            <div>
+                                <h5 class="alert-heading mb-1">Échec de la validation</h5>
+                                <p class="mb-0">{{ result.message }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <div class="alert alert-danger">
+                            <i class="fas fa-user-times me-2"></i>Accès refusé
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <!-- Scanner Camera Modal -->
+                <div class="modal fade" id="scannerModal" tabindex="-1" aria-labelledby="scannerModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="scannerModalLabel">Scanner un QR code</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="text-center">
+                                    <div id="scanner-placeholder" class="bg-light p-5 mb-3">
+                                        <i class="fas fa-camera fa-3x text-muted mb-3"></i>
+                                        <h5>Prévisualisation de la caméra</h5>
+                                        <p class="text-muted">Cette fonctionnalité utiliserait l'API WebRTC pour accéder à la caméra et scanner les QR codes en temps réel.</p>
+                                    </div>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>Placez le QR code du billet face à la caméra pour le scanner automatiquement.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Instructions de validation</h5>
+            </div>
+            <div class="card-body">
+                <ol>
+                    <li>Demandez au participant de présenter son billet électronique (sur smartphone ou imprimé)</li>
+                    <li>Scannez le QR code en utilisant le bouton "Scanner un QR code" (ou saisissez manuellement les données)</li>
+                    <li>Vérifiez l'identité du participant en comparant avec la pièce d'identité présentée</li>
+                    <li>Validez le billet si toutes les informations sont correctes</li>
+                    <li>En cas de problème, dirigez le participant vers le point d'assistance</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="{{ url_for('tickets.verify') }}" class="btn btn-outline-primary me-2">
+                <i class="fas fa-search me-2"></i>Vérifier un billet (sans valider)
+            </a>
+            <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Retour à l'accueil
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gestionnaire pour le bouton de scan
+        const scanButton = document.getElementById('scan-button');
+        const scannerModal = new bootstrap.Modal(document.getElementById('scannerModal'));
+        
+        if (scanButton) {
+            scanButton.addEventListener('click', function() {
+                // Ouvrir la modal du scanner
+                scannerModal.show();
+                
+                // Cette fonction simulerait un scan de QR code dans une application réelle
+                // Nous utiliserions l'API WebRTC pour accéder à la caméra et une bibliothèque comme jsQR pour analyser les QR codes
+                // Pour cette démonstration, nous simulons juste un scan réussi après un délai
+                
+                // Simulation d'un scan après 3 secondes
+                setTimeout(function() {
+                    // Dans une véritable implémentation, ce code serait exécuté uniquement lorsqu'un QR code est détecté
+                    scannerModal.hide();
+                    
+                    // Nous simulons l'insertion des données scannées dans le textarea
+                    document.getElementById('qr_data').value = '{"id":"12345","ticket_id":"789","key":"abc123def456","timestamp":"2024-07-26T10:30:00Z"}';
+                    
+                    alert('QR code scanné avec succès! (Ceci est une simulation)');
+                }, 3000);
+            });
+        }
+        
+        // Gestionnaire pour le bouton d'impression
+        const printBtn = document.getElementById('print-btn');
+        if (printBtn) {
+            printBtn.addEventListener('click', function() {
+                window.print();
+            });
+        }
+    });
+</script>
+{% endblock %}
