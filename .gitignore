@@ -1,15 +1,10 @@
-# Environnement virtuel
-venv/
-env/
-ENV/
-.env
-
-# Fichiers Python compilés
+# Fichiers Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+env/
 build/
 develop-eggs/
 dist/
@@ -21,39 +16,49 @@ lib64/
 parts/
 sdist/
 var/
-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Environnement virtuel
+venv/
+ENV/
 
 # Flask
 instance/
 .webassets-cache
 
-# SQLite database files
+# Environnement de développement
+.env
+.venv
+.flaskenv
+
+# Base de données SQLite
 *.db
 *.sqlite
-*.sqlite3
-
-# Dossiers et fichiers de configuration
-.idea/
-.vscode/
-*.swp
-*.swo
-.DS_Store
-
-# Fichiers de configuration potentiellement sensibles
-config.py
-.env
-
-# Fichiers d'upload
-static/uploads/
 
 # Logs
 logs/
 *.log
 
-# Cache
-.pytest_cache/
-.coverage
-htmlcov/
+# Dossiers spécifiques à l'application
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+
+# Fichiers Docker
+.dockerignore
+
+# Dossiers spécifiques aux IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Système d'exploitation
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
