@@ -1,35 +1,19 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
-from flask_admin.contrib.sqla import ModelView
-from flask_admin import AdminIndexView, expose
-from app import db, admin
+from app import db
 from app.models.user import User
 from app.models.offer import Offer
 from app.models.order import Order
 from app.models.ticket import Ticket
-from app.forms.admin_forms import OfferForm
+from app.forms.admin_forms import OfferForm, UserForm
 from datetime import datetime
 import json
+import os
+from werkzeug.utils import secure_filename
+from flask import current_app
 
-admin_bp = Blueprint('admin_custom', __name__, url_prefix='/admin')
-
-# Classes pour les vues administrateur
-class SecureModelView(ModelView):
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.role == 'administrateur'
-    
-    def inaccessible_callback(self, name, **kwargs):
-        flash('Accès refusé. Vous devez être administrateur.', 'danger')
-        return redirect(url_for('auth.login', next=request.url))
-
-class AdminHomeView(AdminIndexView):
-    @expose('/')
-    def index(self):
-        if not current_user.is_authenticated or current_user.role != 'administrateur':
-            flash('Accès refusé. Vous devez être administrateur.', 'danger')
-            return redirect(url_for('auth.login', next=request.url))
-        
-        return self.render('admin/index.html')
+# Utiliser un préfixe d'URL différent pour éviter les conflits avec Flask-Admin
+admin_bp = Blueprint('admin_custom', __name__, url_prefix='/admin-custom')
 
 # Routes pour l'administration
 @admin_bp.route('/')
@@ -64,7 +48,7 @@ def index():
     for offer_type, count in offers_stats:
         offers_stats_dict[offer_type] = count
     
-    # Conversions ventes
+    # Commandes récentes
     recent_orders = Order.query.filter_by(statut='payée').order_by(Order.date_commande.desc()).limit(5).all()
     
     return render_template(
@@ -128,7 +112,7 @@ def new_offer():
         db.session.commit()
         
         flash(f'Offre "{offer.titre}" créée avec succès.', 'success')
-        return redirect(url_for('admin.offers'))
+        return redirect(url_for('admin_custom.offers'))
     
     return render_template('admin/offer_form.html', form=form, title='Nouvelle offre')
 
@@ -167,7 +151,7 @@ def edit_offer(offer_id):
         db.session.commit()
         
         flash(f'Offre "{offer.titre}" modifiée avec succès.', 'success')
-        return redirect(url_for('admin.offers'))
+        return redirect(url_for('admin_custom.offers'))
     
     return render_template('admin/offer_form.html', form=form, offer=offer, title='Modifier l\'offre')
 
@@ -187,13 +171,13 @@ def delete_offer(offer_id):
     # Vérifier si l'offre a des billets associés
     if offer.tickets:
         flash(f'Impossible de supprimer l\'offre "{offer.titre}" car elle a des billets associés.', 'danger')
-        return redirect(url_for('admin.offers'))
+        return redirect(url_for('admin_custom.offers'))
     
     db.session.delete(offer)
     db.session.commit()
     
     flash(f'Offre "{offer.titre}" supprimée avec succès.', 'success')
-    return redirect(url_for('admin.offers'))
+    return redirect(url_for('admin_custom.offers'))
 
 @admin_bp.route('/users')
 @login_required
@@ -208,6 +192,111 @@ def users():
     
     users = User.query.all()
     return render_template('admin/users.html', users=users)
+
+@admin_bp.route('/users/new', methods=['GET', 'POST'])
+@login_required
+def new_user():
+    """
+    Création d'un nouvel utilisateur.
+    """
+    # Vérifier que l'utilisateur est administrateur
+    if current_user.role != 'administrateur':
+        flash('Accès refusé. Vous devez être administrateur.', 'danger')
+        return redirect(url_for('main.index'))
+    
+    from app import bcrypt
+    form = UserForm()
+    
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = User(
+            username=form.username.data,
+            email=form.email.data,
+            password=hashed_password,
+            nom=form.nom.data,
+            prenom=form.prenom.data,
+            role=form.role.data,
+            est_verifie=form.est_verifie.data
+        )
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        flash(f'Utilisateur "{user.username}" créé avec succès.', 'success')
+        return redirect(url_for('admin_custom.users'))
+    
+    return render_template('admin/user_form.html', form=form, title='Nouvel utilisateur')
+
+@admin_bp.route('/users/<int:user_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_user(user_id):
+    """
+    Modification d'un utilisateur existant.
+    """
+    # Vérifier que l'utilisateur est administrateur
+    if current_user.role != 'administrateur':
+        flash('Accès refusé. Vous devez être administrateur.', 'danger')
+        return redirect(url_for('main.index'))
+    
+    from app import bcrypt
+    user = User.query.get_or_404(user_id)
+    form = UserForm(obj=user)
+    
+    # Ne pas exiger le mot de passe en édition
+    form.password.validators = []
+    form.confirm_password.validators = []
+    
+    if form.validate_on_submit():
+        user.username = form.username.data
+        user.email = form.email.data
+        user.nom = form.nom.data
+        user.prenom = form.prenom.data
+        user.role = form.role.data
+        user.est_verifie = form.est_verifie.data
+        
+        # Changer le mot de passe uniquement s'il est fourni
+        if form.password.data:
+            user.password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        
+        db.session.commit()
+        
+        flash(f'Utilisateur "{user.username}" modifié avec succès.', 'success')
+        return redirect(url_for('admin_custom.users'))
+    
+    # Vider les champs de mot de passe pour l'affichage
+    form.password.data = ''
+    form.confirm_password.data = ''
+    
+    return render_template('admin/user_form.html', form=form, user=user, title='Modifier l\'utilisateur')
+
+@admin_bp.route('/users/<int:user_id>/delete', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    """
+    Suppression d'un utilisateur.
+    """
+    # Vérifier que l'utilisateur est administrateur
+    if current_user.role != 'administrateur':
+        flash('Accès refusé. Vous devez être administrateur.', 'danger')
+        return redirect(url_for('main.index'))
+    
+    # Empêcher la suppression de son propre compte
+    if user_id == current_user.id:
+        flash('Vous ne pouvez pas supprimer votre propre compte.', 'danger')
+        return redirect(url_for('admin_custom.users'))
+    
+    user = User.query.get_or_404(user_id)
+    
+    # Vérifier si l'utilisateur a des commandes ou des billets associés
+    if user.orders or user.tickets:
+        flash(f'Impossible de supprimer l\'utilisateur "{user.username}" car il a des commandes ou des billets associés.', 'danger')
+        return redirect(url_for('admin_custom.users'))
+    
+    db.session.delete(user)
+    db.session.commit()
+    
+    flash(f'Utilisateur "{user.username}" supprimé avec succès.', 'success')
+    return redirect(url_for('admin_custom.users'))
 
 @admin_bp.route('/orders')
 @login_required

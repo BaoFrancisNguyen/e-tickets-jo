@@ -7,6 +7,7 @@ from flask_mail import Mail
 from flask_admin import Admin
 from flask_session import Session
 from app.config import Config
+from app.admin_views import AdminHomeView  # Importer depuis app.admin_views
 
 # Initialisation des extensions
 db = SQLAlchemy()
@@ -17,7 +18,7 @@ login_manager.login_message = 'Veuillez vous connecter pour accéder à cette pa
 login_manager.login_message_category = 'info'
 bcrypt = Bcrypt()
 mail = Mail()
-admin = Admin(name='JO E-Tickets Admin', template_mode='bootstrap4')
+admin = Admin(name='JO E-Tickets Admin', template_mode='bootstrap4', index_view=AdminHomeView())
 session = Session()
 
 def create_app(config_class=Config):
@@ -50,19 +51,10 @@ def create_app(config_class=Config):
     app.register_blueprint(admin_bp)
     app.register_blueprint(main_bp)
 
-    # Enregistrement des modèles administrateur
-    from app.models.user import User
-    from app.models.offer import Offer
-    from app.models.order import Order
-    from app.models.ticket import Ticket
-    from flask_admin.contrib.sqla import ModelView
-
-    # Configuration des vues administrateur
-    from app.routes.admin import SecureModelView, AdminIndexView
-    admin.add_view(SecureModelView(User, db.session))
-    admin.add_view(SecureModelView(Offer, db.session))
-    admin.add_view(SecureModelView(Order, db.session))
-    admin.add_view(SecureModelView(Ticket, db.session))
+    # Initialisation de Flask-Admin
+    with app.app_context():
+        from app.admin_config import init_admin
+        init_admin(admin)
 
     # Gestionnaire d'erreurs
     @app.errorhandler(404)
