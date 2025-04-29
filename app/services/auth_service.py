@@ -52,8 +52,15 @@ def register_user(username, email, password, nom, prenom):
     """
     Enregistre un nouvel utilisateur.
     """
+    # Logs de débogage
+    from flask import current_app
+    current_app.logger.info(f"Tentative d'inscription avec email: {email}")
+    
     # Vérifier si l'email existe déjà
-    if User.query.filter_by(email=email).first():
+    existing_user = User.query.filter_by(email=email).first()
+    current_app.logger.info(f"Utilisateur existant avec cet email: {existing_user}")
+    
+    if existing_user:
         return False, "Cette adresse email est déjà utilisée."
     
     # Vérifier si le nom d'utilisateur existe déjà

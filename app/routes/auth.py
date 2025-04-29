@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, session
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
-from app import db, login_manager
+from app import db, login_manager, app
 from app.models.user import User
 from app.services.auth_service import (
     register_user, verify_account, login_user as auth_login_user,
@@ -17,19 +17,15 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     """Page d'inscription."""
-    print("⭐ Route register appelée")
     if current_user.is_authenticated:
-        print("⭐ Utilisateur déjà authentifié, redirection vers l'accueil")
         return redirect(url_for('main.index'))
     
     form = RegistrationForm()
-    print(f"⭐ Méthode : {request.method}")
     
     if request.method == 'POST':
-        print(f"⭐ Données du formulaire : {request.form}")
+        app.logger.info(f"Tentative d'inscription avec les données: {request.form}")
     
     if form.validate_on_submit():
-        print("⭐ Formulaire validé")
         try:
             success, result = register_user(
                 username=form.username.data,
@@ -38,25 +34,147 @@ def register():
                 nom=form.nom.data,
                 prenom=form.prenom.data
             )
-            print(f"⭐ Résultat de register_user : success={success}, result={result}")
             
             if success:
-                flash('Votre compte a été créé avec succès. Veuillez vérifier votre email pour activer votre compte.', 'success')
-                print("⭐ Redirection vers login")
+                flash('Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.', 'success')
                 return redirect(url_for('auth.login'))
             else:
-                flash(result, 'danger')
-                print(f"⭐ Erreur : {result}")
+                flash(f"Erreur lors de l'inscription: {result}", 'danger')
         except Exception as e:
-            print(f"⭐ Exception : {str(e)}")
-            import traceback
-            print(traceback.format_exc())
-            flash(f"Une erreur s'est produite : {str(e)}", 'danger')
+            app.logger.error(f"Exception lors de l'inscription: {str(e)}")
+            flash(f"Une erreur s'est produite: {str(e)}", 'danger')
     else:
-        print(f"⭐ Erreurs de validation : {form.errors}")
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"Erreur dans le champ {getattr(form, field).label.text}: {error}", 'danger')
     
-    print("⭐ Rendu du template register.html")
     return render_template('auth/register.html', form=form)
+
+@auth_bp.route('/debug-users')
+def debug_users():
+    """Route temporaire pour déboguer les utilisateurs."""
+    from app.models.user import User
+    
+    # Vérifier si l'utilisateur est connecté et est admin
+    if not current_user.is_authenticated or current_user.role != 'administrateur':
+        users_count = User.query.count()
+        return f"Nombre d'utilisateurs dans la base de données: {users_count}. Connectez-vous en tant qu'administrateur pour plus de détails."
+    
+    # Obtenir tous les utilisateurs
+    users = User.query.all()
+    user_list = []
+    
+    for user in users:
+        user_list.append({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'role': user.role,
+            'date_creation': user.date_creation.strftime('%Y-%m-%d %H:%M:%S') if user.date_creation else None
+        })
+    
+    return jsonify(user_list)
+
+@auth_bp.route('/remove-user/<email>')
+def remove_user(email):
+    """Route temporaire pour supprimer un utilisateur par email."""
+    # Uniquement accessible à l'administrateur
+    if not current_user.is_authenticated or current_user.role != 'administrateur':
+        flash('Accès refusé. Connectez-vous en tant qu\'administrateur.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    user = User.query.filter_by(email=email).first()
+    
+    if user:
+        try:
+            db.session.delete(user)
+            db.session.commit()
+            flash(f'Utilisateur avec email {email} supprimé avec succès.', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Erreur lors de la suppression: {str(e)}', 'danger')
+    else:
+        flash(f'Aucun utilisateur trouvé avec l\'email {email}.', 'warning')
+    
+    return redirect(url_for('admin_custom.users') if current_user.role == 'administrateur' else url_for('main.index'))
+
+@auth_bp.route('/create-test-user')
+def create_test_user():
+    """Route temporaire pour créer un utilisateur de test."""
+    # Vérifier si l'utilisateur existe déjà
+    if User.query.filter_by(email="testuser@example.com").first():
+        flash('Utilisateur de test existe déjà.', 'info')
+        return redirect(url_for('auth.login'))
+        
+    try:
+        from app import bcrypt
+        
+        # Créer directement l'utilisateur sans passer par register_user
+        hashed_password = bcrypt.generate_password_hash("TestUser123!").decode('utf-8')
+        user = User(
+            username="testuser",
+            email="testuser@example.com",
+            password=hashed_password,
+            nom="Test",
+            prenom="User",
+            est_verifie=True
+        )
+        db.session.add(user)
+        db.session.commit()
+        
+        flash('Utilisateur de test créé avec succès. Vous pouvez maintenant vous connecter avec email: testuser@example.com et mot de passe: TestUser123!', 'success')
+    except Exception as e:
+        flash(f"Exception: {str(e)}", 'danger')
+        
+    return redirect(url_for('auth.login'))
+
+@auth_bp.route('/quick-register', methods=['GET', 'POST'])
+def quick_register():
+    """Route simplifiée pour l'inscription."""
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        nom = request.form.get('nom')
+        prenom = request.form.get('prenom')
+        
+        # Vérifications manuelles simples
+        if not all([username, email, password, confirm_password, nom, prenom]):
+            flash('Tous les champs sont obligatoires.', 'danger')
+            return render_template('auth/quick_register.html')
+        
+        if password != confirm_password:
+            flash('Les mots de passe ne correspondent pas.', 'danger')
+            return render_template('auth/quick_register.html')
+        
+        # Vérifier manuellement si l'email existe
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            flash('Cet email est déjà utilisé.', 'danger')
+            return render_template('auth/quick_register.html')
+        
+        # Créer l'utilisateur directement
+        from app import bcrypt
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        user = User(
+            username=username,
+            email=email,
+            password=hashed_password,
+            nom=nom,
+            prenom=prenom,
+            est_verifie=True
+        )
+        db.session.add(user)
+        db.session.commit()
+        
+        flash('Compte créé avec succès! Vous pouvez maintenant vous connecter.', 'success')
+        return redirect(url_for('auth.login'))
+    
+    return render_template('auth/quick_register.html')
 
 @auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_token(token):
@@ -208,10 +326,7 @@ def setup_2fa_route():
     # Stocker le secret en session pour la vérification
     session['setup_2fa_secret'] = result['secret']
     
-    # Passer à la fois le secret et l'URI du QR code au template
-    return render_template('auth/setup_2fa.html', 
-                           uri=result['uri'], 
-                           secret=result['secret'])
+    return render_template('auth/setup_2fa.html', uri=result['uri'])
 
 @auth_bp.route('/verify-2fa', methods=['POST'])
 @login_required
