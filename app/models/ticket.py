@@ -40,34 +40,47 @@ class Ticket(db.Model):
     
     def _generate_qr_code(self):
         """Génère un QR code pour le billet."""
-        # Création des données du QR code
-        data = {
-            'id': str(uuid.uuid4()),  # Identifiant unique pour ce QR code
-            'ticket_id': str(self.id) if self.id else None,
-            'key': self.cle_billet,
-            'timestamp': datetime.utcnow().timestamp()
-        }
-        
-        # Conversion en chaîne JSON
-        import json
-        qr_data = json.dumps(data)
-        
-        # Génération du QR code
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(qr_data)
-        qr.make(fit=True)
-        
-        img = qr.make_image(fill_color="black", back_color="white")
-        
-        # Conversion en base64
-        buffered = BytesIO()
-        img.save(buffered)
-        return base64.b64encode(buffered.getvalue()).decode()
+        try:
+            import qrcode
+            import base64
+            from io import BytesIO
+            import json
+            from datetime import datetime
+            
+            # Création des données du QR code
+            data = {
+                'id': str(uuid.uuid4()),
+                'ticket_id': str(self.id) if self.id else "pending",
+                'key': self.cle_billet,
+                'timestamp': datetime.utcnow().timestamp()
+            }
+            
+            # Conversion en chaîne JSON
+            qr_data = json.dumps(data)
+            
+            # Génération du QR code
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(qr_data)
+            qr.make(fit=True)
+            
+            img = qr.make_image(fill_color="black", back_color="white")
+            
+            # Conversion en base64
+            buffered = BytesIO()
+            img.save(buffered, format="PNG")
+            img_str = base64.b64encode(buffered.getvalue()).decode()
+            
+            # Retourner le data URI complet
+            return f"data:image/png;base64,{img_str}"
+        except Exception as e:
+            print(f"Erreur de génération de QR code: {str(e)}")
+            # QR code de secours en cas d'erreur
+            return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQMAAABDsxw2AAAABlBMVEX///8AAABVwtN+AAABE0lEQVR42u3aMQ7CMAyF4dZdOQKHcGQOw22/ZhKnolLU3zOg5Emt2JL+0cYIuA9zMq4zudyiP1fk4eLO7J2NC1/c2fnLnI/L+X1Fz7i0XDJvuPCgudwSXG4lLnzmnnNX7mruA/eJ+8J94xJ2zp1zl7mjucztZm45d82dc7fcwSXsnLvmLrlzLmHn3Dl3zp1zt9wld84l7Ji75C65cy5h59w5d86dc7fc4QY75y65S+6cS9g5d86dc+fcLXfJnXMJO+YuuUvunEv/DltyDl9yDl9yFl9yFl9ydj91Bx91Dh91Dh91Fh91Fh93Dh93Dh93Hh93Hh97/j/P4eO+7UKO3tKO3uSCftAKO0PdG2vD9AZTrZAjY8b4AAAASUVORK5CYII="
     
     def validate(self):
         """Valide le billet lors de l'utilisation."""

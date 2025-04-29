@@ -42,11 +42,14 @@
                         </div>
                         <div class="col-md-5 text-center">
                             <div class="qr-code-container bg-white p-3 rounded mb-3">
-                                <img src="{{ ticket.qr_code }}" alt="QR Code" class="img-fluid qr-code-img">
+                                {% if ticket.qr_code %}
+                                    <img src="{{ ticket.qr_code }}" alt="QR Code" class="img-fluid qr-code-img">
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        QR code non disponible. Veuillez contacter le support.
+                                    </div>
+                                {% endif %}
                             </div>
-                            <small class="text-white-50">Ce QR code sera scanné à l'entrée de l'événement</small>
-                        </div>
-                    </div>
                     
                     <div class="row mb-3">
                         <div class="col-12">
