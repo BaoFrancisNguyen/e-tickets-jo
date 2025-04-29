@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, session, jsonify
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session, jsonify, current_app
 from flask_login import login_user, logout_user, login_required, current_user
-from app import db, login_manager, app
+from app import db, login_manager
 from app.models.user import User
 from app.services.auth_service import (
     register_user, verify_account, login_user as auth_login_user,
@@ -23,7 +23,7 @@ def register():
     form = RegistrationForm()
     
     if request.method == 'POST':
-        app.logger.info(f"Tentative d'inscription avec les données: {request.form}")
+        current_app.logger.info(f"Tentative d'inscription avec les données: {request.form}")
     
     if form.validate_on_submit():
         try:
@@ -41,7 +41,7 @@ def register():
             else:
                 flash(f"Erreur lors de l'inscription: {result}", 'danger')
         except Exception as e:
-            app.logger.error(f"Exception lors de l'inscription: {str(e)}")
+            current_app.logger.error(f"Exception lors de l'inscription: {str(e)}")
             flash(f"Une erreur s'est produite: {str(e)}", 'danger')
     else:
         for field, errors in form.errors.items():
