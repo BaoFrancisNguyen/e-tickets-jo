@@ -23,11 +23,12 @@ def init_app():
             email="admin@jo-etickets.fr",
             password="AdminSecure123!",
             nom="Admin",
-            prenom="JO E-Tickets",
-            role="administrateur",
-            est_verifie=True
+            prenom="JO E-Tickets"
         )
         if success:
+            # Modifier manuellement le rôle de l'utilisateur après sa création
+            admin_user.role = "administrateur"
+            db.session.commit()
             app.logger.info("Utilisateur administrateur créé avec succès")
         else:
             app.logger.error(f"Échec de la création de l'utilisateur administrateur: {admin_user}")
