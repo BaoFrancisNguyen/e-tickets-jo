@@ -21,18 +21,42 @@ mail = Mail()
 admin = Admin(name='JO E-Tickets Admin', template_mode='bootstrap4', index_view=AdminHomeView())
 session = Session()
 
-def create_app(config_class=Config):
-    app = Flask(__name__)
-    app.config.from_object(config_class)
+# Stockage global pour les vues admin
+admin_views = {}
 
+def create_app(config=None):
+    app = Flask(__name__)
+    
+    # Charger la configuration par défaut
+    app.config.from_object(Config)
+    
+    # Mettre à jour avec la configuration spécifique passée en paramètre
+    if config is not None:
+        app.config.update(config)
+    
+    # Vérifier que SQLALCHEMY_DATABASE_URI est défini
+    if not app.config.get('SQLALCHEMY_DATABASE_URI'):
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///jo_etickets.db'
+    
     # Initialisation des extensions avec l'application
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
     bcrypt.init_app(app)
     mail.init_app(app)
-    admin.init_app(app)
     session.init_app(app)
+    
+    # Initialiser seulement si DISABLE_ADMIN n'est pas True (utile pour les tests)
+    if not app.config.get('DISABLE_ADMIN', False):
+        # Initialisation de Flask-Admin
+        admin.init_app(app)
+        with app.app_context():
+            # Vider le stockage global des vues admin
+            global admin_views
+            admin_views.clear()
+            # Initialiser l'admin
+            from app.admin_config import init_admin
+            init_admin(admin)
 
     # Enregistrement des blueprints
     from app.routes.auth import auth_bp
@@ -50,11 +74,6 @@ def create_app(config_class=Config):
     app.register_blueprint(tickets_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(main_bp)
-
-    # Initialisation de Flask-Admin
-    with app.app_context():
-        from app.admin_config import init_admin
-        init_admin(admin)
 
     # Gestionnaire d'erreurs
     @app.errorhandler(404)

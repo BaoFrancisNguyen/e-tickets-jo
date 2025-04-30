@@ -113,8 +113,16 @@ class TicketAdminView(AdminBaseView):
     create_modal = False
     edit_modal = False
 
+_initialized = False
+
 def init_admin(admin):
     """Initialise l'interface d'administration Flask-Admin"""
+    global _initialized
+    
+    # Éviter l'initialisation multiple en mode test
+    if _initialized:
+        return
+    
     # Importer les modèles
     from app.models.user import User
     from app.models.offer import Offer
@@ -122,8 +130,10 @@ def init_admin(admin):
     from app.models.ticket import Ticket
     from app import db
     
-    # Ajouter les vues à l'admin
-    admin.add_view(UserAdminView(User, db.session, name="Utilisateurs"))
-    admin.add_view(OfferAdminView(Offer, db.session, name="Offres"))
-    admin.add_view(OrderAdminView(Order, db.session, name="Commandes"))
-    admin.add_view(TicketAdminView(Ticket, db.session, name="Billets"))
+    # Ajouter les vues à l'admin avec des noms uniques
+    admin.add_view(UserAdminView(User, db.session, name="Utilisateurs", endpoint="users_admin"))
+    admin.add_view(OfferAdminView(Offer, db.session, name="Offres", endpoint="offers_admin"))
+    admin.add_view(OrderAdminView(Order, db.session, name="Commandes", endpoint="orders_admin"))
+    admin.add_view(TicketAdminView(Ticket, db.session, name="Billets", endpoint="tickets_admin"))
+    
+    _initialized = True
